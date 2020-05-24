@@ -77,6 +77,7 @@ def get_digits(img, seglines, fpath):
     labels = list(fpath.split('/')[-1][:-4])
     for i in range(len(seglines) - 1):
         digit = img[:, seglines[i]:seglines[i+1]+1, :]
+        digit = cv2.resize(digit, (70, 130))
         digits.append(digit)
 
     return digits, labels
@@ -89,6 +90,17 @@ def save_digits(digits, labels, prefix='./digits'):
         cv2.imwrite(f'{prefix}/{fname}.bmp', digits[i])
 
 
+def img_enhance(grayimg):
+    grayimg = grayimg.copy()
+    # histogram equalization
+    grayimg = cv2.equalizeHist(grayimg)
+    # smooth
+    for _ in range(3):
+        grayimg = cv2.medianBlur(grayimg, 5)
+        grayimg = cv2.blur(grayimg, (3, 3))
+    return grayimg
+
+
 def execute(fpath):
     img = cv2.imread(fpath, )
     if img is None:
@@ -97,25 +109,11 @@ def execute(fpath):
     img = cv2.resize(img, (500, 130), cv2.INTER_AREA)
     # to gray
     grayimg = img2gray(img)
-    # histogram equalization
-    grayimg = cv2.equalizeHist(grayimg)
-    smooth_grayimg = grayimg.copy()
-    # smooth
-    # for _ in range(20):
-    #     smooth_grayimg = cv2.medianBlur(smooth_grayimg, 3)
-    #     smooth_grayimg = cv2.GaussianBlur(smooth_grayimg, (3, 3), 0)
-    for _ in range(3):
-        smooth_grayimg = cv2.medianBlur(smooth_grayimg, 5)
-        smooth_grayimg = cv2.blur(smooth_grayimg, (3, 3))
-
+    smooth_grayimg = img_enhance(grayimg)
     bimg = gray2binary(smooth_grayimg)
     seglines = segment(bimg)
 
-    smooth_grayimg = grayimg.copy()
-    for _ in range(3):
-        smooth_grayimg = cv2.medianBlur(smooth_grayimg, 5)
-        smooth_grayimg = cv2.blur(smooth_grayimg, (3, 3))
-        # smooth_grayimg = cv2.GaussianBlur(smooth_grayimg, (3, 3), 0)
+    smooth_grayimg = img_enhance(grayimg)
     bimg = gray2binary(smooth_grayimg, 175)
     for seg in seglines:
         bimg[:, seg] = 255
@@ -123,10 +121,10 @@ def execute(fpath):
     digits, labels = get_digits(img, seglines, fpath)
     save_digits(digits, labels)
 
-    # cv2.imshow('W1', bimg, )
-    # cv2.moveWindow('W1', 0, 0)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+    cv2.imshow('W1', bimg, )
+    cv2.moveWindow('W1', 0, 0)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 def main():
