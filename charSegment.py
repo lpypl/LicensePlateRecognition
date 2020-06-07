@@ -13,7 +13,7 @@ def smooth_filter(grayimg):
     # 进行直方图均衡化会导致大量噪点，直接使用效果很好
     # grayimg = cv2.equalizeHist(grayimg)
     # smooth
-    for siz in [3]:
+    for siz in [3, ]:
         # todo 实现中值滤波和均值滤波
         # grayimg = cv2.medianBlur(grayimg, siz)
         grayimg = image_filter(grayimg, "median", siz)
@@ -112,7 +112,7 @@ def char_segment(binaryImage, borders):
 
 def license2charImg(bgrImage):
     """
-    车牌识别
+    车牌图片转字符图片
     :param bgrImage:
     :return:
     """
