@@ -45,9 +45,13 @@ def gray2binary_otsu(grayimg):
     return binaryImage
 
 
+def gray2binary(grayimg):
+    return gray2binary_otsu(grayimg)
+
+
 def image_filter(grayimg, method, scale=3):
     """
-    平滑滤波
+    中值/均值 平滑滤波
     :param grayimg: gray image
     :param method: median,mean
     :param scale: region scale
@@ -72,3 +76,56 @@ def image_filter(grayimg, method, scale=3):
             else:
                 raise ValueError(f"method类型错误")
     return outImage
+
+
+def gaussian_filter(img, K_size=3, sigma=1.3):
+    """
+    高斯平滑滤波
+    :param img:
+    :param K_size:
+    :param sigma:
+    :return:
+    """
+    if len(img.shape) == 3:
+        H, W, C = img.shape
+    else:
+        img = np.expand_dims(img, axis=-1)
+        H, W, C = img.shape
+    pad = K_size // 2
+    out = np.zeros((H + pad * 2, W + pad * 2, C), dtype=np.float)
+    out[pad: pad + H, pad: pad + W] = img.copy().astype(np.float)
+    K = np.zeros((K_size, K_size), dtype=np.float)
+    for x in range(-pad, -pad + K_size):
+        for y in range(-pad, -pad + K_size):
+            K[y + pad, x + pad] = np.exp(-(x ** 2 + y ** 2) / (2 * (sigma ** 2)))
+    K /= (2 * np.pi * sigma * sigma)
+    K /= K.sum()
+    tmp = out.copy()
+    for y in range(H):
+        for x in range(W):
+            for c in range(C):
+                out[pad + y, pad + x, c] = np.sum(K * tmp[y: y + K_size, x: x + K_size, c])
+    out = np.clip(out, 0, 255)
+    out = out[pad: pad + H, pad: pad + W].astype(np.uint8)
+    return out
+
+
+def hist_equalization(img):
+    """
+    直方图均衡化
+    :param img:
+    :return:
+    """
+    img = img.copy()
+    H, W = img.shape
+    gray = np.zeros(256)
+    for i in range(H):
+        for j in range(W):
+            gray[img[i][j]] += 1
+    SumGray = np.zeros(256)
+    SumGray = np.cumsum(gray)
+    SumGray = np.array((SumGray * 255) / (H * W)).astype(np.int32)
+    for i in range(H):
+        for j in range(W):
+            img[i][j] = SumGray[img[i][j]]
+    return img
