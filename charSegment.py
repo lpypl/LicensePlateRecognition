@@ -1,16 +1,6 @@
 import cv2
 import sys
-import numpy as np
-
-
-def img2gray(img):
-    """
-    BGR图像灰度化
-    :param img: bgrImage
-    :return: grayImage
-    """
-    # YCrCb
-    return (img[:, :] * np.array([0.1140, 0.5870, 0.2990])).sum(axis=2).astype(np.uint8)
+from basicAlgorithm import *
 
 
 def smooth_filter(grayimg):
@@ -25,15 +15,11 @@ def smooth_filter(grayimg):
     # smooth
     for siz in [3]:
         # todo 实现中值滤波和均值滤波
-        grayimg = cv2.medianBlur(grayimg, siz)
-        grayimg = cv2.blur(grayimg, (siz, siz))
+        # grayimg = cv2.medianBlur(grayimg, siz)
+        grayimg = image_filter(grayimg, "median", siz)
+        grayimg = image_filter(grayimg, "mean", siz)
+        # grayimg = cv2.blur(grayimg, (siz, siz))
     return grayimg
-
-
-def gray2binary(grayimg):
-    # todo otsu算法
-    threshold, bimg = cv2.threshold(grayimg, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    return bimg
 
 
 def crop_vertical_border(binaryImg):
@@ -113,7 +99,12 @@ def char_segment(binaryImage, borders):
                 if (region_row_projection > 0).sum() > 30:
                     # char "1"
                     if height / (end - start) > 4:
-                        region = binaryImage[:, start-20:end + 1 + 20]
+                        rows, cols = region.shape
+                        pad = (rows // 2 - cols) // 2
+                        region = np.hstack([np.zeros((rows, pad), dtype=region.dtype),
+                                            region,
+                                            np.zeros((rows, pad), dtype=region.dtype)])
+                        pass
                     charImg = cv2.resize(region, (30, 60))
                     charImages.append(charImg)
     return charImages
@@ -128,9 +119,12 @@ def license2charImg(bgrImage):
     # resize
     bgrImage = cv2.resize(bgrImage, (500, 130), cv2.INTER_AREA)
     # to gray
-    grayimg = img2gray(bgrImage)
+    grayimg = bgr2gray(bgrImage)
     smooth_grayimg = smooth_filter(grayimg)
-    binaryImage = gray2binary(smooth_grayimg)
+    binaryImage = gray2binary_otsu(smooth_grayimg)
+    cv2.imshow('W1', binaryImage)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     # crop vertical borders
     binaryImage = crop_vertical_border(binaryImage)
     # detect her borders
