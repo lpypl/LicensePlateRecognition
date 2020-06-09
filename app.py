@@ -53,10 +53,10 @@ class Ui(QMainWindow):
         if not filename:
             return
 
-        self.openImageAndShow(filename, self.imgLoad)
+        self.__openImageAndShow(filename, self.imgLoad)
         # TODO 获取图片存入self
 
-    def openImageAndShow(self, filename, label):
+    def __openImageAndShow(self, filename, label):
         m_image = QImage(filename)
         if m_image.isNull():
             QMessageBox.information(self, "Image Viewer",
@@ -78,7 +78,11 @@ class Ui(QMainWindow):
         #TODO what is this function does
         print("btnSavePressed")
 
+def main():
+    app = QApplication(sys.argv)
+    window = Ui()
+    app.exec_()
 
-app = QApplication(sys.argv)
-window = Ui()
-app.exec_()
+
+if __name__ == '__main__':
+    main()
