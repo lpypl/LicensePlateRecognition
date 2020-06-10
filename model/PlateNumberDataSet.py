@@ -12,36 +12,44 @@ han_labels = ['粤', '云', '浙', '藏', '川', '鄂', '甘', '赣', '贵', '�
               '蒙', '闽', '宁', '青', '琼', '陕', '苏', '皖', '湘', '新', '渝', '豫']
 
 transform = T.Compose([
-    # T.Resize(128),  # 缩放图片Image
+    T.Resize((28, 28)),  # 缩放图片Image
     # T.CenterCrop(128),  # 从图片中间切出图片
     T.ToTensor(),  # 将图片转成Tensor，归一化为 [0,1]
 ])
 
 
 class PlateNumberDataSet(data.Dataset):
-    def __init__(self, root, transforms=None):
-        self.transforms = transform
-        with open(root, 'r') as f:
-            self.lines = f.readlines()
+    def __init__(self, root, transforms=None, han=False):
+        imgs = os.listdir(root)
+        self.imgs = [os.path.join(root, img) for img in imgs]
+        if han:
+            self.labels = [han_labels.index(img_name.split('_')[0]) for img_name in imgs]
+        else:
+            self.labels = [digit_labels.index(img_name.split('_')[0]) for img_name in imgs]
+        if transforms:
+            self.transforms = transforms
+        else:
+            self.transforms = transform
 
     def __getitem__(self, index):
-        img_path, img_label = self.lines[index].split()
+        img_path = self.imgs[index]
+        img_label = self.labels[index]
         img_data = Image.open(img_path)
         if self.transforms:
             img_data = self.transforms(img_data)
         return img_data, img_label
 
     def __len__(self):
-        return len(self.lines)
+        return len(self.imgs)
 
 
 if __name__ == '__main__':
-    train_txt = './train.txt'
-    dataset = PlateNumberDataSet(train_txt)
+    img_root = '../dataset/数字和字母测试集/'
+    dataset = PlateNumberDataSet(img_root, han=False)
     to_img = T.ToPILImage()
     img, label = dataset[0]
     img = to_img(img)
     img.show()
-    print(len(plate_labels))
+    print(len(digit_labels))
     for img, label in dataset:
         print(img.size(), label)

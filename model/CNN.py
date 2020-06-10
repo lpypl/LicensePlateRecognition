@@ -5,12 +5,12 @@ from torch.utils.data import DataLoader
 from torchvision import models
 from torch import optim
 
-train_path = '../digits_train/'
-test_path = '../digits_test/'
+train_path = '../dataset/数字和字母训练集/'
+test_path = '../dataset/数字和字母测试集/'
 trainset = PlateNumberDataSet(train_path)
 testset = PlateNumberDataSet(test_path)
 trainloader = DataLoader(trainset,
-                         batch_size=3,
+                         batch_size=128,
                          shuffle=True,
                          drop_last=False)
 testloader = DataLoader(testset,
@@ -44,16 +44,16 @@ def train(epochs, num_class):
             optimizer.step()
             running_loss += loss.item()
 
-            # 每10步打印一下loss
-            if i % 10 == 9:
-                print('epoch: %d, %d loss: %f' % (epoch + 1, i + 1, running_loss / 10))
+            # 每100步打印一下loss
+            if i % 100 == 99:
+                print('epoch: %d, %d loss: %f' % (epoch + 1, i + 1, running_loss / 100))
                 running_loss = 0.0
 
-    t.save(resnet34, './model.pkl')
+    t.save(resnet34, './digit_model.pkl')
 
 
 def test():
-    model = t.load('./model.pkl')
+    model = t.load('./digit_model.pkl')
     total = 0
     correct = 0
     for data in testloader:
