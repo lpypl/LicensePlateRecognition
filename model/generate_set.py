@@ -1,35 +1,38 @@
+import numpy as np
 from sklearn.model_selection import train_test_split
 import os
 import shutil
 
-plate_labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
-                'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '川', '鄂', '赣', '甘', '贵',
-                '桂', '黑', '沪', '冀', '津', '京', '吉', '辽', '鲁', '蒙', '闽', '宁', '青', '琼', '陕', '苏', '晋',
-                '皖', '湘', '新', '豫', '渝', '粤', '云', '藏', '浙']
+digit_labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K',
+                'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+han_labels = ['粤', '云', '浙', '藏', '川', '鄂', '甘', '赣', '贵', '桂', '黑', '沪', '吉', '冀', '津', '晋', '京', '辽', '鲁',
+              '蒙', '闽', '宁', '青', '琼', '陕', '苏', '皖', '湘', '新', '渝', '豫']
 
 
-def generate_train_and_test_set(img_root_path, to_train_path, to_test_path):
-    imgs = os.listdir(img_root_path)
-    labels = [plate_labels.index(img_name.split('_')[0]) for img_name in imgs]
+# 数字和字母 0~33
+# 汉字 34~64
+def generate_train_and_test_set():
+    for i in range(0, 34):
+        imgs = os.listdir('../dataset/单字符车牌/' + str(i) + '/')
+        img_label = digit_labels[i]
+        for index, img_name in enumerate(imgs, 1):
+            src = '../dataset/单字符车牌/' + str(i) + '/' + img_name
+            new_name = img_label + '_' + str(index) + '.jpg'
+            dst = '../dataset/单字符车牌/数字和字母/' + new_name
+            shutil.copy(src, dst)
+    for i in range(34, 65):
+        imgs = os.listdir('../dataset/单字符车牌/' + str(i) + '/')
+        img_label = han_labels[i - 34]
+        for index, img_name in enumerate(imgs, 1):
+            src = '../dataset/单字符车牌/' + str(i) + '/' + img_name
+            new_name = img_label + '_' + str(index) + '.jpg'
+            dst = '../dataset/单字符车牌/汉字/' + new_name
+            shutil.copy(src, dst)
 
-    if not os.path.exists(to_train_path):
-        os.makedirs(to_train_path)
-    if not os.path.exists(to_test_path):
-        os.makedirs(to_test_path)
 
-    X_train, X_test, y_train, y_test = train_test_split(imgs, labels, test_size=0.2, shuffle=True, random_state=1)
-    for img in X_train:
-        in_path = os.path.join(img_root_path, img)
-        to_path = os.path.join(to_train_path, img)
-        shutil.copy(in_path, to_path)
-    for img in X_test:
-        in_path = os.path.join(img_root_path, img)
-        to_path = os.path.join(to_test_path, img)
-        shutil.copy(in_path, to_path)
+def main():
+    generate_train_and_test_set()
 
 
 if __name__ == '__main__':
-    img_root_path = '../digits/'
-    to_train_path = '../digits_train/'
-    to_test_path = '../digits_test/'
-    generate_train_and_test_set(img_root_path, to_train_path, to_test_path)
+    main()
