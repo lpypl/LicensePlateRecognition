@@ -12,6 +12,11 @@ def generate_train_and_test_set(img_root_path, to_train_path, to_test_path):
     imgs = os.listdir(img_root_path)
     labels = [plate_labels.index(img_name.split('_')[0]) for img_name in imgs]
 
+    if not os.path.exists(to_train_path):
+        os.makedirs(to_train_path)
+    if not os.path.exists(to_test_path):
+        os.makedirs(to_test_path)
+
     X_train, X_test, y_train, y_test = train_test_split(imgs, labels, test_size=0.2, shuffle=True, random_state=1)
     for img in X_train:
         in_path = os.path.join(img_root_path, img)
