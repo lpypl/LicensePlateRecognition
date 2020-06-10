@@ -1,8 +1,5 @@
 import cv2
 import sys
-
-from setuptools.msvc import winreg
-
 from basicAlgorithm import *
 
 
@@ -63,7 +60,7 @@ class CharSplitter:
         # detect
         height, width = binaryImg.shape
         # 列元素少于一定比例，认为是空列
-        column_projection = binaryImg.sum(axis=0) < 255 * int(height * 0.15)
+        column_projection = binaryImg.sum(axis=0) < 255 * int(height * 0.07)
         # row_projection = binaryImg.sum(axis=1)
         borders = []
         borders = [0, 0]
@@ -80,14 +77,17 @@ class CharSplitter:
                     start = end
                     spaceWidth = 1
             else:
-                if column_projection[start] and spaceWidth > int(width * 0.01):
+                # 含有效像素比例低于X，认为是空白区域(边界)
+                if column_projection[start] and spaceWidth < width*0.1 and binaryImg[:,
+                                                start:start + spaceWidth].sum() < spaceWidth * height * 255 * 0.10:
+                    # if column_projection[start] and spaceWidth > int(width * 0.01):
                     borders.append(start)
                     borders.append(end)
                     spaceWidth = 0
                     start = end
                 else:
                     start = end
-        borders.extend([len(column_projection)-1, len(column_projection)-1])
+        borders.extend([len(column_projection) - 1, len(column_projection) - 1])
         return borders
 
     def __char_segment(self, binaryImage, borders):
@@ -99,12 +99,12 @@ class CharSplitter:
         """
         height, width = binaryImage.shape
         charImages = []
-        for ind in range(len(borders)-1):
+        for ind in range(len(borders) - 1):
             if ind % 2 == 1:
                 start = borders[ind]
                 end = borders[ind + 1]
                 if end - start > 10:
-                    region = binaryImage[:, start:end+1]
+                    region = binaryImage[:, start:end + 1]
                     region_row_projection = region.sum(axis=1)
                     # 根据在x（row）方向的投影筛选有效数字区域
                     if (region_row_projection > 0).sum() / height > 0.3:
@@ -194,6 +194,7 @@ def main():
         cv2.imshow('W1', imgs)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
     import os
     dirname = r'./dataset/车牌图片库'
     file_list = os.listdir(dirname)
@@ -206,4 +207,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

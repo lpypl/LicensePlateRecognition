@@ -5,7 +5,7 @@ import cv2
 
 
 if __name__ == '__main__':
-    bgrImage = cv2.imread('dataset/example28.bmp')
+    bgrImage = cv2.imread('dataset/example06.bmp')
 
     # Pretreatment
     pt = Pretreatment(bgrImage)
