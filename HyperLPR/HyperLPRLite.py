@@ -159,9 +159,9 @@ class LPR:
         for j, plate in enumerate(images):
             plate, rect = plate
             image_rgb, rect_refine = self.finemappingVertical(plate, rect)
-            cv2.imshow('', image_rgb)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+            # cv2.imshow('', image_rgb)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
             res, confidence = self.recognizeOne(image_rgb)
             res_set.append([res, confidence, rect_refine])
         return res_set

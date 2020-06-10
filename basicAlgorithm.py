@@ -8,7 +8,7 @@ def bgr2gray(img):
     :return: grayImage
     """
     # YCrCb
-    return (img[:, :] * np.array([0.5000, 0.2500, 0.2500])).sum(axis=2).astype(np.uint8)
+    return (img[:, :] * np.array([0.5000, 0.3000, 0.2000])).sum(axis=2).astype(np.uint8)
     # return (img[:, :] * np.array([0.1140, 0.5870, 0.2990])).sum(axis=2).astype(np.uint8)
 
 

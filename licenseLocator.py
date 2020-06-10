@@ -43,7 +43,7 @@ class LicenseLocator:
 
 
 if __name__ == '__main__':
-    bgrImage = cv2.imread('dataset/车牌号/P04-06-11_12.52[3].jpg')
+    bgrImage = cv2.imread('dataset/example28.bmp')
     ll = LicenseLocator(bgrImage)
     rectImage = ll.getRectImage()
     if rectImage is not None:
