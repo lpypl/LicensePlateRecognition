@@ -13,7 +13,6 @@ han_labels = ['粤', '云', '浙', '藏', '川', '鄂', '甘', '赣', '贵', '�
 
 transform = T.Compose([
     T.Resize((28, 28)),  # 缩放图片Image
-    # T.CenterCrop(128),  # 从图片中间切出图片
     T.ToTensor(),  # 将图片转成Tensor，归一化为 [0,1]
 ])
 
@@ -37,6 +36,7 @@ class PlateNumberDataSet(data.Dataset):
         img_data = Image.open(img_path)
         if self.transforms:
             img_data = self.transforms(img_data)
+
         return img_data, img_label
 
     def __len__(self):
