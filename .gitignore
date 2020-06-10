@@ -3,4 +3,10 @@ __pycache__
 .idea
 digits_test
 digits_train
-dataset/单字符车牌
+
+
+/dataset/数字和字母测试集/
+/dataset/数字和字母训练集/
+/dataset/汉字测试集/
+/dataset/汉字训练集/
+/dataset/单字符车牌/
