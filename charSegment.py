@@ -16,15 +16,16 @@ class CharSplitter:
         """
         binaryImg = binaryImg.copy()
         row_projection = binaryImg.sum(axis=1)
+        pixel_threshold = 100
         # 剪掉上下边框
         up_start = 0
         for i in range(len(row_projection)):
-            if row_projection[i] > 50 * 255:
+            if row_projection[i] > pixel_threshold * 255:
                 up_start = i
                 break
         down_end = 0
         for i in range(len(row_projection) - 1, 0, -1):
-            if row_projection[i] > 50 * 255:
+            if row_projection[i] > pixel_threshold * 255:
                 down_end = i
                 break
         binaryImg = binaryImg[up_start:down_end, :]
@@ -37,9 +38,11 @@ class CharSplitter:
         :return: 边界信息
         """
         binaryImg = binaryImg.copy()
+        # detect
         column_projection = binaryImg.sum(axis=0) < 255 * 10
         # row_projection = binaryImg.sum(axis=1)
-        borders = [0, 0]
+        borders = []
+        # borders = [0, 0]
         start = 0
         width = 0
         for end in range(1, len(column_projection)):
@@ -60,7 +63,7 @@ class CharSplitter:
                     start = end
                 else:
                     start = end
-        borders.extend([len(column_projection)-1, len(column_projection)-1])
+        # borders.extend([len(column_projection)-1, len(column_projection)-1])
         return borders
 
     def __char_segment(self, binaryImage, borders):
@@ -76,11 +79,11 @@ class CharSplitter:
             if ind % 2 == 1:
                 start = borders[ind]
                 end = borders[ind + 1]
-                if end - start > 5:
+                if end - start > 10:
                     region = binaryImage[:, start:end+1]
                     region_row_projection = region.sum(axis=1)
                     # 根据在x（row）方向的投影筛选有效数字区域
-                    if (region_row_projection > 0).sum() > 30:
+                    if (region_row_projection > 0).sum() / height > 0.3:
                         # char "1"
                         if height / (end - start) > 4:
                             rows, cols = region.shape
@@ -98,10 +101,18 @@ class CharSplitter:
         灰度图
         :return:
         """
-        return bgr2gray(self.bgrImage)
+        grayImage = bgr2gray(self.bgrImage)
+        # return grayImage
+        smoothImage = image_filter(grayImage, 'median', 3)
+        smoothImage = image_filter(smoothImage, 'mean', 3)
+        # smoothImage = cv2.GaussianBlur(smoothImage, (3, 3), 0)
+        return smoothImage
 
     def getBinaryImage(self):
-        return gray2binary(self.getGrayImage())
+        # crop vertical borders
+        binaryImg = gray2binary(self.getGrayImage())
+        binaryImg = self.__crop_vertical_border(binaryImg)
+        return binaryImg
 
     def getSegmentImage(self):
         """
@@ -123,8 +134,8 @@ class CharSplitter:
         :return:
         """
         binaryImage = self.getBinaryImage()
-        # crop vertical borders
-        binaryImage = self.__crop_vertical_border(binaryImage)
+        # # crop vertical borders
+        # binaryImage = self.__crop_vertical_border(binaryImage)
         # detect her borders
         borders = self.__detect_border(binaryImage)
         # char segmentation
