@@ -1,2 +1,5 @@
 mask_rcnn_carplate_0030.h5
 __pycache__
+.idea
+digits_test
+digits_train
