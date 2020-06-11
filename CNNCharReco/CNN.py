@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch as t
-from model.PlateNumberDataSet import PlateNumberDataSet
+from CNNCharReco.PlateNumberDataSet import PlateNumberDataSet
 from torch.utils.data import DataLoader
 from torchvision import models
 from torch import optim
