@@ -42,8 +42,8 @@ han_testloader = DataLoader(han_testset,
                             drop_last=False)
 
 """
-digits训练30个epoch，batch_size=128正确率97.6%，loss仍有下降空间。
-汉字训练60个epoch batch_size=32，正确率95.3%，loss仍有下降空间。
+digits训练40个epoch，batch_size=128正确率98.5%，loss仍有下降空间。
+汉字训练70个epoch batch_size=32，正确率94.3%，loss仍有下降空间。
 """
 
 
@@ -114,13 +114,13 @@ def predict(pil_img, model_path, kind='digit'):
 
 
 def main():
-    # 训练模型
-    # train(epochs=30, num_class=len(digit_labels), trainloader=digit_trainloader, model_save_path='./digit_model.pkl')
-    # train(epochs=60, num_class=len(han_labels), trainloader=han_trainloader, model_save_path='./han_model.pkl')
-
-    # 字母和数字测试
+    # #训练模型
+    # train(epochs=40, num_class=len(digit_labels), trainloader=digit_trainloader, model_save_path='./digit_model.pkl')
+    # train(epochs=70, num_class=len(han_labels), trainloader=han_trainloader, model_save_path='./han_model.pkl')
+    #
+    # #字母和数字测试
     # model_test(testloader=digit_testloader, model_path='./digit_model.pkl')
-    # 汉字测试
+    # #汉字测试
     # model_test(testloader=han_testloader, model_path='./han_model.pkl')
 
     # 模型预测
