@@ -1,10 +1,11 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication, QFileDialog, QMessageBox, QLabel, QSizePolicy
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication, QFileDialog, QMessageBox, QLabel, QSizePolicy, QTextEdit
 from PyQt5 import uic, QtCore
 from PyQt5.QtGui import QIcon, QPalette, QPixmap, QImage
 from pretreatment import *
 from licenseLocator import *
 from charSegment import *
+from licenseReco import LicenseReco
 
 
 class Ui(QMainWindow):
@@ -13,6 +14,8 @@ class Ui(QMainWindow):
         uic.loadUi('app.ui', self)
         self.show()
 
+        # 用于保存当前步奏得到的图片
+        self.c_pic = None
         # 获取组件, 绑定点击事件
         widgets = [
             'btnOpen', 'btnSave', 'btnPictureGray', 'btnGrayScales',
@@ -20,13 +23,15 @@ class Ui(QMainWindow):
             'btnCharSplit', 'btnEdgeDetection', 'btnLocation',
             'btnCharIdentify', 'imgLoad', 'imgLocate', 'imgSplit', 'imgChar0',
             'imgChar1', 'imgChar2', 'imgChar3', 'imgChar4', 'imgChar5',
-            'imgChar6',
+            'imgChar6', 'txtResult'
         ]
         for widget in widgets:
             if widget.startswith('btn'):
                 self[widget] = self.findChild(QPushButton, widget)
             elif widget.startswith('img'):
                 self[widget] = self.findChild(QLabel, widget)
+            elif widget.startswith('txt'):
+                self[widget] = self.findChild(QTextEdit, widget)
 
             if hasattr(self, (widget) + 'Pressed'):
                 self[widget].clicked.connect(
@@ -51,13 +56,25 @@ class Ui(QMainWindow):
             print('__openFileNameDialog:' + fileName)
         return fileName
 
+    def __saveFileNameDialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(
+            self,
+            "QFileDialog.getSaveFileName()",
+            "save.jpg",
+            "Images (*.png *.xpm *.jpg *.bmp);;All Files (*)",
+            options=options)
+        if fileName:
+            print('__openFileNameDialog:' + fileName)
+        return fileName
+
     def btnOpenPressed(self):
         filename = self.__openFileNameDialog()
         if not filename:
             return
 
         self.__openImageAndShow(filename, self.imgLoad)
-        # TODO 获取图片存入self
 
     def __openImageAndShow(self, filename, label):
         m_image = QImage(filename)
@@ -74,6 +91,8 @@ class Ui(QMainWindow):
         self.licenseImage = self.ll.getLicenseImage()
         if(self.licenseImage is not None):
             self.splitter = CharSplitter(self.licenseImage)
+            self.reco = LicenseReco(digit_model_path='./CNNCharReco/digit_model.pkl',
+                                    han_model_path='./CNNCharReco/han_model.pkl')
 
     def __showImageInLabel(self, m_image: QImage, label):
         if(m_image is None):
@@ -81,9 +100,11 @@ class Ui(QMainWindow):
             return
         label.clear()
 
+        self.c_pic = m_image
+
         lebalWidth = label.frameGeometry().width()
         lebalHeight = label.frameGeometry().height()
-        print('label width and height:',lebalWidth, lebalHeight)
+        print('label width and height:', lebalWidth, lebalHeight)
         m_image.scaled(lebalWidth,
                        lebalHeight,
                        aspectRatioMode=QtCore.Qt.KeepAspectRatio,
@@ -125,7 +146,8 @@ class Ui(QMainWindow):
         if(image is None):
             print("CNp2QImage image is None")
             return None
-        print('convert to QImage, (height width):', image.shape, type(image), image.data)
+        print('convert to QImage, (height width):',
+              image.shape, type(image), image.data)
 
         data = image.data
         height, width, *channel = image.shape
@@ -158,14 +180,21 @@ class Ui(QMainWindow):
                 self.splitter.getSegmentImage()), self.imgSplit)
 
             charImages = self.splitter.getCharImages()
-            print(len(charImages))
-            for n in range(0, 7):
+            for n in range(0, 7 if len(charImages) > 7 else len(charImages)):
                 self.__showImageInLabel(self.CNp2QImage(
                     charImages[n]), getattr(self, 'imgChar' + str(n)))
 
+    def btnCharIdentifyPressed(self):
+        if(hasattr(self, "splitter")):
+            result = self.reco.predict(self.splitter.getCharImages())
+            self.txtResult.setPlainText(result)
+
     def btnSavePressed(self):
-        # TODO what is this function does
-        print("btnSavePressed")
+        filename = self.__saveFileNameDialog()
+        if filename is not None:
+            if not self.c_pic.save(filename):
+                QMessageBox.information(self, "Error",
+                                        "图片保存失败")
 
 
 def main():
