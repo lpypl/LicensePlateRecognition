@@ -50,9 +50,10 @@ if __name__ == '__main__':
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
         charImages = splitter.getCharImages()
+
+        # 测试
         reco = LicenseReco(digit_model_path='./CNNCharReco/digit_model.pkl',
                            han_model_path='./CNNCharReco/han_model.pkl')
-
         result = reco.predict(charImages)
         print(result)
         imgs = np.hstack(charImages)
