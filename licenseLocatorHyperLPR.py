@@ -1,27 +1,45 @@
-from licenseLocatorHyperLPR import LicenseLocator as model1
-from Mask_RCNN.carPlateLocation import LicenseLocator as model2
+import HyperLPR.HyperLPRLite as pr
 import cv2
 
 
 class LicenseLocator:
     def __init__(self, bgrImage):
-        self.model = model1(bgrImage)
-        if not self.model.fit():
-            self.model = model2(bgrImage)
+        self.bgrImage = bgrImage
+        self.rect = None
+
+    def fit(self):
+        model = pr.LPR("HyperLPR/model/cascade.xml", "HyperLPR/model/model12.h5", "HyperLPR/model/ocr_plate_all_gru.h5")
+        for pstr, confidence, rect in model.SimpleRecognizePlateByE2E(self.bgrImage):
+            if confidence > 0.7:
+                self.rect = (int(rect[0]), int(rect[1]), int(rect[0] + rect[2]), int(rect[1] + rect[3]))
+                # print("plate_str:", pstr)
+                # print("plate_confidence", confidence)
+        if self.rect is None:
+            return False
+        else:
+            return True
 
     def getRectImage(self):
         """
         获取带车牌轮廓的图片
         :return: 若寻找失败，返回None
         """
-        return self.model.getRectImage()
+        if not self.fit():
+            return None
+        image = self.bgrImage.copy()
+        cv2.rectangle(image, (self.rect[0], self.rect[1]), (self.rect[2], self.rect[3]), (0, 0, 255), 2,
+                      cv2.LINE_AA)
+        return image
 
     def getLicenseImage(self):
         """
         获取车牌图片
         :return: 若寻找失败，返回None
         """
-        return self.model.getLicenseImage()
+        if not self.fit():
+            return None
+        licenseImage = self.bgrImage[self.rect[1]:self.rect[3], self.rect[0]:self.rect[2]]
+        return licenseImage
 
 
 if __name__ == '__main__':

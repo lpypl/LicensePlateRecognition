@@ -5,7 +5,8 @@ import cv2
 from licenseReco import LicenseReco
 
 if __name__ == '__main__':
-    bgrImage = cv2.imread('dataset/example20.bmp')
+    # bgrImage = cv2.imread('dataset/028.jpg')
+    bgrImage = cv2.imread('dataset/licenseSet/京A88731.jpg')
 
     # # Pretreatment
     # pt = Pretreatment(bgrImage)
@@ -24,10 +25,10 @@ if __name__ == '__main__':
     # LicenseLocator
     ll = LicenseLocator(bgrImage)
     rectImage = ll.getRectImage()
-    # if rectImage is not None:
-    #     cv2.imshow('', rectImage)
-    #     cv2.waitKey(0)
-    #     cv2.destroyAllWindows()
+    if rectImage is not None:
+        cv2.imshow('', rectImage)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
     licenseImage = ll.getLicenseImage()
     if licenseImage is not None:
