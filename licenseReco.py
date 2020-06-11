@@ -14,9 +14,8 @@ class LicenseReco:
         self.han_labels = ['粤', '云', '浙', '藏', '川', '鄂', '甘', '赣', '贵', '桂', '黑', '沪', '吉', '冀', '津', '晋',
                            '京', '辽', '鲁', '蒙', '闽', '宁', '青', '琼', '陕', '苏', '皖', '湘', '新', '渝', '豫']
         self.transforms = T.Compose([
-            T.Pad(padding=(13, 0, 13, 0), fill=0),
-            T.Resize((35, 35)),
-            T.CenterCrop((28, 28)),
+            T.Pad(padding=(10, 0, 10, 0), fill=0),
+            # T.CenterCrop((28, 28)),
             T.Resize((28, 28)),  # 缩放图片Image
             T.ToTensor(),  # 将图片转成Tensor，归一化为 [0,1]
         ])
@@ -36,7 +35,7 @@ class LicenseReco:
         index = t.argmax(output)
         result.append(self.han_labels[index])
 
-        for digit_img in charImages[1:]:
+        for digit_img in charImages[1:7]:
             digit_img = Image.fromarray(digit_img)
             digit_img = digit_img.convert(mode='RGB')
             # digit_img.show()
