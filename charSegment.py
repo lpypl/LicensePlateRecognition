@@ -1,3 +1,5 @@
+from itertools import chain
+
 import cv2
 import sys
 from basicAlgorithm import *
@@ -9,6 +11,47 @@ class CharSplitter:
         self.bgrImage = cv2.resize(licenseBGRImage, (500, 130), cv2.INTER_AREA)
         self.cropBgrImage = self.bgrImage.copy()
 
+    # def __crop_vertical_border(self, binaryImg):
+    #     """
+    #     借助在Y轴上的投影裁减掉上方和下方的边界
+    #     :param binaryImg: 二值图像
+    #     :return: 裁减掉上方和下方的边界的二值图像
+    #     """
+    #     height, width = binaryImg.shape
+    #     binaryImg = binaryImg.copy()
+    #     row_projection = binaryImg.sum(axis=1)
+    #     row_threshold = 100
+    #     # 剪掉上下边框
+    #     up_start = 0
+    #     for i in range(len(row_projection)):
+    #         if row_threshold * 255 < row_projection[i] < (width - row_threshold) * 255:
+    #             up_start = i
+    #             break
+    #     down_end = 0
+    #     for i in range(len(row_projection) - 1, 0, -1):
+    #         if row_threshold * 255 < row_projection[i] < (width - row_threshold) * 255:
+    #             down_end = i
+    #             break
+    #
+    #     binaryImg = binaryImg[up_start:down_end, :]
+    #     self.cropBgrImage = self.bgrImage[up_start:down_end, :]
+    #
+    #     height, width = binaryImg.shape
+    #     col_projection = binaryImg.sum(axis=0)
+    #     left_start = 0
+    #     for i in range(len(col_projection)):
+    #         if int(height * 0.2) * 255 < col_projection[i] < int(height * 0.7) * 255:
+    #             left_start = i
+    #             break
+    #     right_end = 0
+    #     for i in range(len(col_projection) - 1, 0, -1):
+    #         if int(height * 0.2) * 255 < col_projection[i] < int(height * 0.7) * 255:
+    #             right_end = i
+    #             break
+    #     binaryImg = binaryImg[:, left_start:right_end]
+    #     self.cropBgrImage = self.cropBgrImage[:, left_start:right_end]
+    #     return binaryImg
+
     def __crop_vertical_border(self, binaryImg):
         """
         借助在Y轴上的投影裁减掉上方和下方的边界
@@ -18,18 +61,23 @@ class CharSplitter:
         height, width = binaryImg.shape
         binaryImg = binaryImg.copy()
         row_projection = binaryImg.sum(axis=1)
-        row_threshold = 100
         # 剪掉上下边框
-        up_start = 0
-        for i in range(len(row_projection)):
-            if row_threshold * 255 < row_projection[i] < (width - row_threshold) * 255:
+        # 从中间向两边扫描更加有效
+        up_start = int(height / 2)
+        down_end = int(height / 2)
+        for i in range(up_start, 0, -1):
+            if row_projection[i] < width * 0.2 * 255 or row_projection[i] > width * 0.7 * 255:
                 up_start = i
                 break
-        down_end = 0
-        for i in range(len(row_projection) - 1, 0, -1):
-            if row_threshold * 255 < row_projection[i] < (width - row_threshold) * 255:
+        for i in range(down_end, height, 1):
+            if row_projection[i] < width * 0.2 * 255 or row_projection[i] > width * 0.7 * 255:
                 down_end = i
                 break
+
+        if up_start == int(height / 2):
+            up_start = 0
+        if down_end == int(height / 2):
+            down_end = height
 
         binaryImg = binaryImg[up_start:down_end, :]
         self.cropBgrImage = self.bgrImage[up_start:down_end, :]
@@ -60,7 +108,11 @@ class CharSplitter:
         # detect
         height, width = binaryImg.shape
         # 列元素少于一定比例，认为是空列
-        column_projection = binaryImg.sum(axis=0) < 255 * int(height * 0.07)
+        column_projection = binaryImg.sum(axis=0) < 255 * int(height * 0.08)
+        # binaryImg[:, column_projection] = 255
+        # cv2.imshow('', binaryImg)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         # row_projection = binaryImg.sum(axis=1)
         borders = []
         borders = [0, 0]
@@ -79,7 +131,7 @@ class CharSplitter:
             else:
                 # 含有效像素比例低于X，认为是空白区域(边界)
                 if column_projection[start] and spaceWidth < width*0.1 and binaryImg[:,
-                                                start:start + spaceWidth].sum() < spaceWidth * height * 255 * 0.10:
+                                                start:start + spaceWidth].sum() < spaceWidth * height * 255 * 0.15:
                     # if column_projection[start] and spaceWidth > int(width * 0.01):
                     borders.append(start)
                     borders.append(end)
@@ -116,6 +168,8 @@ class CharSplitter:
                                                 region,
                                                 np.zeros((rows, pad), dtype=region.dtype)])
                             pass
+                        # charImg = np.zeros((70, 40))
+                        # charImg[5:65, 5:35] = cv2.resize(region, (30, 60))
                         charImg = cv2.resize(region, (30, 60))
                         charImages.append(charImg)
         return charImages
