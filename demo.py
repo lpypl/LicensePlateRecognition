@@ -5,8 +5,7 @@ import cv2
 from licenseReco import LicenseReco
 
 if __name__ == '__main__':
-    # bgrImage = cv2.imread('dataset/028.jpg')
-    bgrImage = cv2.imread('dataset/licenseSet/京A88731.jpg')
+    bgrImage = cv2.imread('dataset/example28.bmp')
 
     # # Pretreatment
     # pt = Pretreatment(bgrImage)
