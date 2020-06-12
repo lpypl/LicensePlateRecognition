@@ -7,8 +7,11 @@ class LicenseLocator:
     def __init__(self, bgrImage):
         self.bgrImage = bgrImage.copy()
         self.rect = None
+        self.fitComplete = False
 
     def fit(self):
+        if self.fitComplete:
+            return True
         model = pr.LPR("HyperLPR/model/cascade.xml", "HyperLPR/model/model12.h5", "HyperLPR/model/ocr_plate_all_gru.h5")
         for pstr, confidence, rect in model.SimpleRecognizePlateByE2E(self.bgrImage):
             if confidence > 0.7:
@@ -18,6 +21,7 @@ class LicenseLocator:
         if self.rect is None:
             return False
         else:
+            self.fitComplete = True
             return True
 
     def getRectImage(self):

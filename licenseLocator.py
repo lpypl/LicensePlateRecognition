@@ -5,15 +5,25 @@ import cv2
 
 class LicenseLocator:
     def __init__(self, bgrImage):
-        self.model = model1(bgrImage)
+        self.bgrImage = bgrImage
+        self.fitComplete = False
+        self.model = None
+
+    def fit(self):
+        if self.fitComplete:
+            return True
+
+        self.model = model1(self.bgrImage)
         if not self.model.fit():
-            self.model = model2(bgrImage)
+            self.model = model2(self.bgrImage)
+        self.fitComplete = True
 
     def getRectImage(self):
         """
         获取带车牌轮廓的图片
         :return: 若寻找失败，返回None
         """
+        self.fit()
         return self.model.getRectImage()
 
     def getLicenseImage(self):
@@ -21,6 +31,7 @@ class LicenseLocator:
         获取车牌图片
         :return: 若寻找失败，返回None
         """
+        self.fit()
         return self.model.getLicenseImage()
 
 

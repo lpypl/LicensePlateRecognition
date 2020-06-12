@@ -50,7 +50,7 @@ def imageCorrection(bgrImage):
             if np.abs(rho) > np.abs(maxLengthLineH[0]):
                 maxLengthLineH = line
 
-    cv2.imshow('Result', result)
+    # cv2.imshow('Result', result)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
 
