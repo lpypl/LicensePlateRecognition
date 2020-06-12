@@ -65,12 +65,13 @@ class CharSplitter:
         # 从中间向两边扫描更加有效
         up_start = int(height / 2)
         down_end = int(height / 2)
+        percent = 0.18
         for i in range(up_start, 0, -1):
-            if row_projection[i] < width * 0.2 * 255 or row_projection[i] > width * 0.7 * 255:
+            if row_projection[i] < width * percent * 255 or row_projection[i] > width * (1 - percent) * 255:
                 up_start = i
                 break
         for i in range(down_end, height, 1):
-            if row_projection[i] < width * 0.2 * 255 or row_projection[i] > width * 0.7 * 255:
+            if row_projection[i] < width * percent * 255 or row_projection[i] > width * (1 - percent) * 255:
                 down_end = i
                 break
 

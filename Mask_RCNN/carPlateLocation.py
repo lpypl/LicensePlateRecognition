@@ -243,7 +243,7 @@ class CarplateConfig(Config):
 
 
 class LicenseLocator:
-    def __init__(self, image):
+    def __init__(self, image, modelPath="Mask_RCNN/mask_rcnn_carplate_0030.h5"):
         self.image = image
         # Root directory of the project
         self.ROOT_DIR = os.path.abspath("./")
@@ -255,7 +255,7 @@ class LicenseLocator:
         self.MODEL_DIR = os.path.join(self.ROOT_DIR, "logs")
 
         # Path to carPalateLocation trained weights
-        self.CARPLATE_WEIGHTS_PATH = "Mask_RCNN/mask_rcnn_carplate_0030.h5"
+        self.CARPLATE_WEIGHTS_PATH = modelPath
 
         # 车牌定位
         self.config = CarplateConfig()
@@ -387,6 +387,12 @@ class LicenseLocator:
 if __name__ == '__main__':
     # 输入图片 :"0204.jpg", 输出结果: "test.jpg"
     image = cv2.imdecode(np.fromfile("../dataset/036.jpg", dtype=np.uint8), -1)
-    model = LicenseLocator(image)
-    model.getRectImage()
-    model.getLicenseImage()
+    model = LicenseLocator(image, 'mask_rcnn_carplate_0030.h5')
+    rectImage = model.getRectImage()
+    licenseImage = model.getLicenseImage()
+    if rectImage is not None:
+        cv2.imshow('1', rectImage)
+    if licenseImage is not None:
+        cv2.imshow('2', licenseImage)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

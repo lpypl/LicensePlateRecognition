@@ -1,10 +1,11 @@
 import HyperLPR.HyperLPRLite as pr
 import cv2
+from ImageCorrection import imageCorrection
 
 
 class LicenseLocator:
     def __init__(self, bgrImage):
-        self.bgrImage = bgrImage
+        self.bgrImage = bgrImage.copy()
         self.rect = None
 
     def fit(self):
@@ -39,7 +40,7 @@ class LicenseLocator:
         if not self.fit():
             return None
         licenseImage = self.bgrImage[self.rect[1]:self.rect[3], self.rect[0]:self.rect[2]]
-        return licenseImage
+        return imageCorrection(licenseImage)
 
 
 if __name__ == '__main__':
