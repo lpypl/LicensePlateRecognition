@@ -245,6 +245,7 @@ class CarplateConfig(Config):
 class LicenseLocator:
     def __init__(self, image, modelPath="Mask_RCNN/mask_rcnn_carplate_0030.h5"):
         self.image = image
+        self.height, self.width = self.image.shape[:2]
         # Root directory of the project
         self.ROOT_DIR = os.path.abspath("./")
 
@@ -290,7 +291,9 @@ class LicenseLocator:
         model.load_weights(self.weights_path, by_name=True)
 
         # Run Detection 这里为模型标注数据
+        # print(self.image.shape[:2])
         self.image = modelib.load_image_gt(self.image, self.config)
+        # print(self.image.shape[:2])
         # 模型预测功能
         self.results = model.detect([self.image], verbose=0)
         self.r = self.results[0]
@@ -322,8 +325,8 @@ class LicenseLocator:
 
             Adjust the size attribute to control how big to render images
             """
-            _, ax = plt.subplots()
-            return ax
+            fig, ax = plt.subplots()
+            return fig, ax
 
         if self.flag == True:
             N = self.r['rois'].shape[0]
@@ -331,9 +334,8 @@ class LicenseLocator:
                 print("\n*** No instances to display *** \n")
             else:
                 assert self.r['rois'].shape[0] == self.r['masks'].shape[-1]
-            ax = get_ax()
+            fig, ax = get_ax()
             for i in range(N):
-
                 # Bounding box
                 if not np.any(self.r['rois'][i]):
                     # Skip this instance. Has no bbox. Likely lost in image cropping.
@@ -343,10 +345,36 @@ class LicenseLocator:
                                       alpha=0.7, linestyle="dashed",
                                       edgecolor="red", facecolor='none')
                 ax.add_patch(p)
-            ax.imshow(self.image)
-            plt.savefig("temp.png", bbox_inches='tight')
-            img = cv2.imread("temp.png")
-            os.remove("temp.png")
+            height, width = self.image.shape[:2]
+            ax.imshow(self.image, aspect='equal')
+            plt.axis('off')
+            fig.set_size_inches(width / 100.0 / 3.0, height / 100.0 / 3.0)
+            plt.gca().xaxis.set_major_locator(plt.NullLocator())
+            plt.gca().yaxis.set_major_locator(plt.NullLocator())
+            plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0, wspace=0)
+            plt.axis('off')
+            plt.savefig("temp.jpg", dpi=300)
+            img = cv2.imread("temp.jpg")
+            a = round((height - self.height) / 2)
+            b = round((width - self.width) / 2)
+            img = img[a:a + self.height, b:b + self.width]
+            os.remove("temp.jpg")
+            # height, width = self.image.shape[:2]
+            #
+            # ax.imshow(image, aspect='equal')
+            # plt.axis('off')
+            # fig.set_size_inches(width / 100.0 / 3.0, height / 100.0 / 3.0)
+            # plt.gca().xaxis.set_major_locator(plt.NullLocator())
+            # plt.gca().yaxis.set_major_locator(plt.NullLocator())
+            # plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0, wspace=0)
+            # plt.axis('off')
+            # plt.savefig("temp.jpg", dpi=300)
+
+            # img = cv2.imread("temp.jpg")
+            # a = round((height - self.height) / 2)
+            # b = round((width - self.width) / 2)
+            # image = self.image[a:a + self.height, b:b + self.width]
+            # os.remove("temp.jpg")
             return img
         else:
             return None
@@ -386,7 +414,7 @@ class LicenseLocator:
 
 if __name__ == '__main__':
     # 输入图片 :"0204.jpg", 输出结果: "test.jpg"
-    image = cv2.imdecode(np.fromfile("../dataset/033.jpg", dtype=np.uint8), -1)
+    image = cv2.imdecode(np.fromfile("../dataset/036.jpg", dtype=np.uint8), -1)
     model = LicenseLocator(image, 'mask_rcnn_carplate_0030.h5')
     rectImage = model.getRectImage()
     licenseImage = model.getLicenseImage()
