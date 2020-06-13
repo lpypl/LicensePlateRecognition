@@ -2,7 +2,7 @@
 ## 1. 创建新的 *python3.6* 虚拟环境并激活
 ## 2. 安装依赖
 ```
-pip install requirments.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 ## 3. 安装 *pytorch* 和 *torchvision*
 - linux 64位
