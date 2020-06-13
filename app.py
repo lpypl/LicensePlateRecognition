@@ -84,7 +84,10 @@ class Ui(QMainWindow):
             return
         self.__showImageInLabel(m_image, label)
 
-        bgrImage = cv2.imread(filename)
+        # win10 环境下cv2.imread 如果路径出现中文会返回None
+        # bgrImage = cv2.imread(filename)
+        import PIL
+        bgrImage = cv2.cvtColor(np.array(PIL.Image.open(filename).convert('RGB')), cv2.COLOR_RGB2BGR)
 
         self.pt = Pretreatment(bgrImage)
         self.ll = LicenseLocator(bgrImage)
