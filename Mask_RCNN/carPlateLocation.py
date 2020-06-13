@@ -343,8 +343,8 @@ class LicenseLocator:
                                       alpha=0.7, linestyle="dashed",
                                       edgecolor="red", facecolor='none')
                 ax.add_patch(p)
-
-            plt.savefig("temp.png")
+            ax.imshow(self.image)
+            plt.savefig("temp.png", bbox_inches='tight')
             img = cv2.imread("temp.png")
             os.remove("temp.png")
             return img
@@ -386,7 +386,7 @@ class LicenseLocator:
 
 if __name__ == '__main__':
     # 输入图片 :"0204.jpg", 输出结果: "test.jpg"
-    image = cv2.imdecode(np.fromfile("../dataset/036.jpg", dtype=np.uint8), -1)
+    image = cv2.imdecode(np.fromfile("../dataset/033.jpg", dtype=np.uint8), -1)
     model = LicenseLocator(image, 'mask_rcnn_carplate_0030.h5')
     rectImage = model.getRectImage()
     licenseImage = model.getLicenseImage()
