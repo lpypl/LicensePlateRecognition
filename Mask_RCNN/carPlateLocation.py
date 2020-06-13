@@ -246,6 +246,7 @@ class LicenseLocator:
     def __init__(self, image, modelPath="Mask_RCNN/mask_rcnn_carplate_0030.h5"):
         self.image = image
         self.height, self.width = self.image.shape[:2]
+        print(self.height, self.width)
         # Root directory of the project
         self.ROOT_DIR = os.path.abspath("./")
 
@@ -355,10 +356,12 @@ class LicenseLocator:
             plt.axis('off')
             plt.savefig("temp.jpg", dpi=300)
             img = cv2.imread("temp.jpg")
-            a = round((height - self.height) / 2)
-            b = round((width - self.width) / 2)
-            img = img[a:a + self.height, b:b + self.width]
+            a = round((height - self.height) / 2.3)
+            b = int((width - self.width) / 2)
+            img = img[a:, :]
+            img = img[:a, :]
             os.remove("temp.jpg")
+            img = cv2.resize(img, (self.width, self.height), interpolation=cv2.INTER_CUBIC)
             # height, width = self.image.shape[:2]
             #
             # ax.imshow(image, aspect='equal')
@@ -384,7 +387,7 @@ class LicenseLocator:
             y0, x0 = self.box.min(axis=0)
             y1, x1 = self.box.max(axis=0)
             img = self.image[y0:y1, x0:x1]
-            res = self.correction(img, self.box, x0, y0)
+            res = self.correction(img, self.box.copy(), x0, y0)
             return res
         else:
             return None
@@ -401,12 +404,12 @@ class LicenseLocator:
         box[:, 1] -= x0
         # 调整box顺序，从左上角开始，逆时针转动
         i0 = (box[:, 0] + box[:, 1]).argmin()
-        box = box[[i0, (i0 + 1) % 4, (i0 + 2) % 4, (i0 + 3) % 4]]
+        boxx = box[[i0, (i0 + 1) % 4, (i0 + 2) % 4, (i0 + 3) % 4]]
 
-        h = np.max([box[1][0] - box[0][0], box[2][0] - box[3][0]])
-        w = np.max([box[2][1] - box[1][1], box[3][1] - box[0][1]])
+        h = np.max([boxx[1][0] - boxx[0][0], boxx[2][0] - boxx[3][0]])
+        w = np.max([boxx[2][1] - boxx[1][1], boxx[3][1] - boxx[0][1]])
         box2 = np.array([(0, 0), (h, 0), (h, w), (0, w)])
-        M = cv2.getPerspectiveTransform(box[:, ::-1].astype(np.float32), box2[:, ::-1].astype(np.float32))
+        M = cv2.getPerspectiveTransform(boxx[:, ::-1].astype(np.float32), box2[:, ::-1].astype(np.float32))
         img = cv2.warpPerspective(img, M, (w, h))
         img = cv2.resize(img, (220, 70))
         return img
@@ -414,7 +417,7 @@ class LicenseLocator:
 
 if __name__ == '__main__':
     # 输入图片 :"0204.jpg", 输出结果: "test.jpg"
-    image = cv2.imdecode(np.fromfile("../dataset/036.jpg", dtype=np.uint8), -1)
+    image = cv2.imdecode(np.fromfile("../dataset/028.jpg", dtype=np.uint8), -1)
     model = LicenseLocator(image, 'mask_rcnn_carplate_0030.h5')
     rectImage = model.getRectImage()
     licenseImage = model.getLicenseImage()
