@@ -4,6 +4,7 @@ __pycache__
 *.iml
 digits_test
 digits_train
+.vscode/**
 
 
 /dataset/数字和字母测试集/

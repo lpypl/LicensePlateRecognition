@@ -73,7 +73,7 @@ class Ui(QMainWindow):
         filename = self.__openFileNameDialog()
         if not filename:
             return
-
+        self.clearAll()
         self.__openImageAndShow(filename, self.imgLoad)
 
     def __openImageAndShow(self, filename, label):
@@ -97,7 +97,7 @@ class Ui(QMainWindow):
             self.reco = LicenseReco(digit_model_path='./CNNCharReco/digit_model.pkl',
                                     han_model_path='./CNNCharReco/han_model.pkl')
 
-    def __showImageInLabel(self, m_image: QImage, label):
+    def __showImageInLabel(self, m_image: QImage, label:QLabel):
         if(m_image is None):
             print("__showImageInLabel m_image is None")
             return
@@ -198,6 +198,19 @@ class Ui(QMainWindow):
             if not self.c_pic.save(filename):
                 QMessageBox.information(self, "Error",
                                         "图片保存失败")
+    def clearAll(self):
+        """
+        'imgLocate', 'imgSplit', 'imgChar0',
+        'imgChar1', 'imgChar2', 'imgChar3', 'imgChar4', 'imgChar5',
+        'imgChar6', 'txtResult'
+        """
+        widgets = ['imgLocate', 'imgSplit', 'imgChar0',
+        'imgChar1', 'imgChar2', 'imgChar3', 'imgChar4', 'imgChar5',
+        'imgChar6']
+        for widget in widgets:
+            getattr(self, widget, None).clear()
+
+        self.txtResult.setPlainText("")
 
 
 def main():

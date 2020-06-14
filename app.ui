@@ -295,14 +295,14 @@
          <item>
           <widget class="QPushButton" name="btnEdgeDetection">
            <property name="text">
-            <string>边缘检测</string>
+            <string>车牌定位</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="btnLocation">
            <property name="text">
-            <string>车牌定位</string>
+            <string>车牌提取与校正</string>
            </property>
           </widget>
          </item>
